@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>D'Alexis Online Courses</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Segoe UI',sans-serif;background:#000;color:#fff;padding:20px;}
+    .container{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 360px;gap:24px;}
+    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+    header .logo{display:flex;align-items:center;gap:10px;color:#e252ff;font-weight:bold;}
+    header .logo img{width:100px;height:70px;border-radius:6px;}
+    .search-bar{display:flex;align-items:center;gap:8px;}
+    .search-bar input{padding:10px 12px;border-radius:8px;border:1px solid #333;width:360px;background:#111;color:#fff;}
+    .lessons{display:flex;flex-direction:column;gap:12px;}
+    .lesson-card{display:flex;justify-content:space-between;align-items:center;padding:12px;border-radius:10px;background: rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.03);}
+    .lesson-left{display:flex;gap:12px;align-items:center;}
+    .lesson-left i{font-size:34px;width:48px;text-align:center;color:#00ffff;}
+    .lesson-meta h4{margin-bottom:6px;}
+    .badges{display:flex;gap:8px;align-items:center;}
+    .badge{background: rgba(255,255,255,0.03);padding:6px 8px;border-radius:8px;font-size:0.95rem;}
+    .lesson-actions{display:flex;gap:8px;align-items:center;}
+    .lesson-actions button{padding:8px 12px;border-radius:8px;border:0;cursor:pointer;background:#00ffff;color:#000;font-weight:600;}
+    .lesson-actions button[disabled]{opacity:0.5;cursor:not-allowed;}
+    aside.cart{background: lab(100% 0.01 -0.01 / 0.03)(0.01 -0.01 / 0.03)(0.01 -0.01 / 0.03);padding:16px;border-radius:10px; height:fit-content; position:sticky; top:20px;}
+    aside h3{margin-bottom:12px;}
+    .cart-item{display:flex;justify-content:space-between;margin-bottom:10px;}
+    .cart-tot{margin-top:12px;font-weight:700;}
+    .checkout-form{margin-top:12px;display:flex;flex-direction:column;gap:8px;}
+    .checkout-form input{padding:8px 10px;border-radius:8px;border:1px solid #333;background:#111;color:#fff;}
+    .checkout-btn{padding:10px;border-radius:10px;border:0;background:#e252ff;color:#fff;font-weight:700;cursor:pointer;}
+    .checkout-btn[disabled]{opacity:0.45;cursor:not-allowed;}
+    .message{margin-top:12px;padding:10px;border-radius:8px;background:#062;color:#cfefd0;}
+    .small{font-size:1.35rem;color:#bbb;}
+    @media (max-width: 900px){.container{grid-template-columns:1fr;}.search-bar input{width:100%;}}
+  </style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="logo">
+      <img src="IMAGES/RERESIZEDDALEXISCOURSELOGO.jpg" alt="" />
+      <div>
+        <div></div>
+        <div class="small"></div>
+      </div>
+    </div>
+    <div class="search-bar">
+      <input type="text" v-model="searchQuery" @input="onSearchInput" placeholder="Search lessons..." aria-label="Search lessons"/>
+      <div class="small" v-if="searching">Searching...</div>
+      <button style="margin-left:10px;padding:6px 10px;background:#e252ff;color:#fff;border:none;border-radius:6px;" @click="toggleCart">
+        Cart ({{ cartCount }})
+      </button>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Lessons -->
+    <section class="lessons" v-if="!showCart">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <h2>Available Lessons</h2>
+        <div>
+          <select v-model="sortAttribute">
+            <option value="subject">Subject</option>
+            <option value="location">Location</option>
+            <option value="price">Price</option>
+            <option value="spaces">Spaces</option>
+          </select>
+          <select v-model="sortOrder">
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+          </select>
+        </div>
+      </div>
+
+      <div v-if="sortedLessons.length === 0" class="small">No lessons found.</div>
+      <div v-for="lesson in sortedLessons" :key="lesson.id" class="lesson-card">
+        <div class="lesson-left">
+          <i :class="lesson.icon"></i>
+          <div class="lesson-meta">
+            <h4>{{ lesson.title }}</h4>
+            <div class="small">Subject: {{ lesson.subject }} • Location: {{ lesson.location }}</div>
+          </div>
+        </div>
+        <div class="lesson-actions">
+          <div class="badges">
+            <div class="badge">${{ lesson.price }}</div>
+            <div class="badge">Spaces: {{ lesson.spaces }}</div>
+          </div>
+          <button :disabled="lesson.spaces <= 0" @click="addToCart(lesson)">Add</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cart -->
+    <aside class="cart" v-if="showCart">
+      <h3>Shopping Cart</h3>
+      <div v-if="cart.length === 0" class="small">Cart is empty.</div>
+      <div v-for="item in cart" :key="item.id" class="cart-item">
+        <div>
+          <div><strong>{{ item.title }}</strong></div>
+          <div class="small">Qty: 
+            <input type="number" v-model.number="item.qty" @change="updateQty(item)" min="1" style="width:70px; background:#111;color:#fff;border:1px solid #333;padding:4px 6px;border-radius:6px;">
+          </div>
+        </div>
+        <div>${{ item.qty * item.price }}</div>
+        <button style="margin-left:10px;padding:4px 8px;background:#ff4d4d;border:none;border-radius:6px;color:#fff;" @click="removeFromCart(item)">Remove</button>
+      </div>
+
+      <div class="cart-tot">Total: ${{ total }}</div>
+
+      <div class="checkout-form">
+        <input type="text" v-model="customerName" placeholder="Name (letters only)">
+        <input type="text" v-model="customerPhone" placeholder="Phone (numbers only)">
+        <button class="checkout-btn" :disabled="!canCheckout" @click="checkout">Checkout</button>
+        <div class="small" v-if="customerName && !nameValid">Name must contain letters and spaces only.</div>
+        <div class="small" v-if="customerPhone && !phoneValid">Phone must contain numbers only.</div>
+        <div class="message" v-if="orderMessage">{{ orderMessage }}</div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+new Vue({
+  el:'#app',
+  data(){
+    return{
+      lessons:[
+        {id:'L001',title:'Intro to Vue',subject:'Vue.js',location:'Port Harcourt',price:49,spaces:5,icon:'fa-brands fa-vuejs'},
+        {id:'L002',title:'Advanced JS',subject:'JavaScript',location:'Lagos',price:69,spaces:5,icon:'fa-brands fa-js'},
+        {id:'L003',title:'HTML & Accessibility',subject:'HTML',location:'Abuja',price:39,spaces:5,icon:'fa-solid fa-code'},
+        {id:'L004',title:'CSS Layouts',subject:'CSS',location:'Benin',price:45,spaces:5,icon:'fa-brands fa-css3-alt'},
+        {id:'L005',title:'Node & Express',subject:'Node.js',location:'Owerri',price:75,spaces:5,icon:'fa-brands fa-node-js'},
+        {id:'L006',title:'MongoDB Basics',subject:'Databases',location:'Uyo',price:55,spaces:5,icon:'fa-solid fa-database'},
+        {id:'L007',title:'React Concepts',subject:'React',location:'Port Harcourt',price:60,spaces:5,icon:'fa-brands fa-react'},
+        {id:'L008',title:'Testing JS',subject:'Testing',location:'Lagos',price:50,spaces:5,icon:'fa-solid fa-vial'},
+        {id:'L009',title:'UX Fundamentals',subject:'UX',location:'Abuja',price:42,spaces:5,icon:'fa-solid fa-user-pen'},
+        {id:'L010',title:'Deployment & CI',subject:'DevOps',location:'Benin',price:80,spaces:5,icon:'fa-solid fa-server'},
+        {id:'L011',title:'Quantitative Reasoning',subject:'Quantitative Apptitude',location:'Lagos',price:40,spaces:5,icon:'fa-solid fa-info-circle'}
+        
+      ],
+      displayedLessons:[],
+      cart:[],
+      customerName:'',
+      customerPhone:'',
+      orderMessage:'',
+      searchQuery:'',
+      searching:false,
+      searchTimer:null,
+      showCart:false,
+      sortAttribute:'subject',
+      sortOrder:'asc'
+    };
+  },
+  created(){ this.displayedLessons = this.lessons.slice(); },
+  computed:{
+    total(){ return this.cart.reduce((sum,it)=>sum + (it.qty*it.price),0); },
+    nameValid(){ return /^[A-Za-z\s]+$/.test(this.customerName.trim()); },
+    phoneValid(){ return /^\d+$/.test(this.customerPhone.trim()); },
+    canCheckout(){ return this.cart.length>0 && this.nameValid && this.phoneValid; },
+    cartCount(){ return this.cart.reduce((sum,it)=>sum+it.qty,0); },
+    sortedLessons(){
+      let arr = this.displayedLessons.slice();
+      let attr = this.sortAttribute;
+      arr.sort((a,b)=>{
+        let valA = a[attr], valB = b[attr];
+        if(typeof valA==='string') valA=valA.toLowerCase();
+        if(typeof valB==='string') valB=valB.toLowerCase();
+        if(valA<valB) return this.sortOrder==='asc'?-1:1;
+        if(valA>valB) return this.sortOrder==='asc'?1:-1;
+        return 0;
+      });
+      return arr;
+    }
+  },
+  methods:{
+    toggleCart(){ this.showCart=!this.showCart; },
+    addToCart(lesson){
+      if(lesson.spaces<=0)return;
+      let existing=this.cart.find(i=>i.id===lesson.id);
+      if(existing) existing.qty+=1;
+      else this.cart.push({id:lesson.id,title:lesson.title,price:lesson.price,qty:1});
+      lesson.spaces-=1;
+    },
+    removeFromCart(item){
+      let index=this.cart.findIndex(i=>i.id===item.id);
+      if(index!==-1)this.cart.splice(index,1);
+      // restore spaces
+      let lesson=this.lessons.find(l=>l.id===item.id);
+      if(lesson) lesson.spaces+=item.qty;
+    },
+    updateQty(item){ if(item.qty<1)item.qty=1; },
+    checkout(){
+      if(!this.canCheckout) return;
+      this.orderMessage=`Order submitted for ${this.customerName.trim()}. Total: $${this.total}. Thank you!`;
+      // reset cart and form
+      this.cart=[];
+      this.customerName='';
+      this.customerPhone='';
+      let vm=this;
+      setTimeout(()=>{vm.orderMessage='';},7000);
+    },
+    onSearchInput(){
+      let vm=this;
+      vm.searching=true;
+      if(vm.searchTimer) clearTimeout(vm.searchTimer);
+      vm.searchTimer=setTimeout(()=>{ vm.clientFilter(vm.searchQuery.trim()); },300);
+    },
+    clientFilter(q){
+      let vm=this;
+      if(!q){ vm.displayedLessons=vm.lessons.slice(); vm.searching=false; return; }
+      let low=q.toLowerCase();
+      vm.displayedLessons=vm.lessons.filter(l=>
+        (l.title && l.title.toLowerCase().includes(low))
+        || (l.subject && l.subject.toLowerCase().includes(low))
+        || (l.location && l.location.toLowerCase().includes(low))
+        || String(l.price).includes(low)
+        || String(l.spaces).includes(low)
+      );
+      vm.searching=false;
+    }
+  }
+});
+</script>
+</body>
+</html>
