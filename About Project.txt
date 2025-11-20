@@ -1,0 +1,170 @@
+D’Alexis Online Courses – Vue.js Lesson Booking App
+
+A modern, responsive, and fully interactive lesson-booking interface built with Vue.js (v2), featuring dynamic search, sorting, cart management, form validation, and a clean UI design using pure CSS and Font Awesome icons.
+
+📌 Project Overview
+
+This project is a single-page Vue.js application designed for an online digital academy. It allows users to browse available lessons, search and sort courses, add items to a cart, update quantities, and complete a checkout form with validation.
+
+The project demonstrates core front-end development skills, including:
+
+Vue.js data binding and reactivity
+
+Dynamic sorting & filtering
+
+Cart state management
+
+Form validation (name + phone)
+
+Responsive layout using CSS Grid
+
+Interactive UI components
+
+Clean component-like structure inside a single HTML file
+
+🧩 Key Features ✔ Dynamic Lesson List
+
+Lessons are loaded from a predefined array and displayed with icons, prices, locations, and available spaces. Users can:
+
+View and scroll through all lessons
+
+See price and remaining spaces
+
+Add lessons to the shopping cart
+
+Automatically decrease available spaces
+
+✔ Search Functionality with Debouncing
+
+The search bar filters lessons by:
+
+Title
+
+Subject
+
+Location
+
+Price
+
+Available spaces
+
+To optimize performance, input is debounced for 300ms, preventing unnecessary filtering on every keystroke.
+
+✔ Sorting System
+
+Users can sort lessons by:
+
+Subject
+
+Location
+
+Price
+
+Spaces
+
+Sorting order: ascending or descending
+
+✔ Shopping Cart System
+
+The cart supports:
+
+Adding lessons
+
+Removing lessons
+
+Changing quantity
+
+Automatic stock restoration
+
+Displaying correct totals
+
+Cart toggle view (Lessons ↔ Cart)
+
+Every cart action updates Vue’s reactive state.
+
+✔ Checkout Form + Validation
+
+Before checkout, the user must enter:
+
+Name → must contain only letters and spaces
+
+Phone → must contain numbers only
+
+A checkout button activates only when both fields are valid and the cart is not empty.
+
+Upon success:
+
+An order confirmation message appears
+
+Cart and form fields reset
+
+Message auto-clears after 7 seconds
+
+✔ Responsive UI Design
+
+The layout uses CSS Grid to display lessons and cart side-by-side. Below 900px, the site becomes a single-column mobile-friendly layout.
+
+🛠 Technologies Used Technology Purpose Vue.js 2 App reactivity and dynamic DOM updates HTML5 App structure and layout CSS3 Styling, grid layout, badges, buttons Font Awesome Icons for lessons JavaScript ES6 Logic, methods, validation 📂 Project Structure (Single-File Architecture) index.html │ ├── <style> → Complete front-end styling ├──
+
+→ Vue instance mount point ├── → Logo, search bar, cart toggle ├── Lessons → Search, sorting, list rendering ├── Cart → Items, quantities, total, checkout └── <script> → Vue instance and app logic
+💡 Vue.js Logic Breakdown Data Structure
+
+The Vue instance stores:
+
+lessons – the full dataset
+
+displayedLessons – filtered lessons
+
+cart – array of selected items
+
+searchQuery – text input
+
+customerName, customerPhone – form fields
+
+sortAttribute, sortOrder – sorting controls
+
+Flags like searching, showCart, orderMessage
+
+Computed Properties Computed Property Role total Calculates the cart total dynamically nameValid Validates customer name phoneValid Validates phone number canCheckout Ensures form is valid before ordering cartCount Shows number of items in the cart sortedLessons Applies sorting rules to filtered lessons Core Methods Method Description addToCart() Adds a lesson, reduces available spaces removeFromCart() Removes lessons and restores spaces updateQty() Updates quantity with validation toggleCart() Switches between lessons and cart checkout() Finalizes order, validates, resets state onSearchInput() Handles debounced search input clientFilter() Filters lessons by search query 🎨 UI & Styling Highlights
+
+Dark modern theme
+
+Neon accent colors (cyan + purple)
+
+Soft glass-like transparency for cards
+
+Rounded components for a modern feel
+
+Responsive grid layout
+
+Clean spacing and typography
+
+📦 Future Enhancements (Optional)
+
+Vue components for modular code
+
+Backend integration for real orders
+
+Authentication system
+
+Admin dashboard for managing lessons
+
+Payment gateway integration
+
+Vue 3 + Pinia version
+
+API-driven courses list
+
+📜 Summary
+
+This project demonstrates a well-structured Vue.js front-end application with full CRUD-like cart functionality, responsive UI, real-time filtering, and client-side validation — all inside a clean, single-file architecture.
+
+It’s perfect for:
+
+Portfolio projects
+
+Front-end skill demonstration
+
+Course marketplace prototypes
+
+Vue.js learning practice
